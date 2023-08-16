@@ -1,0 +1,50 @@
+using UnityEngine;
+
+public class ConeMeshController : MonoBehaviour
+{
+    public float angle = 45f;
+    public float radius = 1f;
+
+    private MeshFilter meshFilter;
+    private Mesh coneMesh;
+
+    private void Start()
+    {
+        meshFilter = GetComponent<MeshFilter>();
+        coneMesh = meshFilter.sharedMesh;
+        
+    }
+
+public void UpdateConeVertices()
+{
+    Vector3[] vertices = coneMesh.vertices;
+
+    Vector3 topVertex = vertices[13]; // Assuming top vertex is at index 0
+    Vector3 baseVertex = vertices[1]; // Assuming base vertex is at index 1
+
+    float baseRadius = Vector3.Distance(topVertex, baseVertex);
+
+    for (int i = 0; i < vertices.Length; i++)
+    {
+        if (i == 0) // Top vertex
+        {
+            // No need to update the top vertex
+            continue;
+        }
+
+        Vector3 originalVertexPosition = vertices[i];
+        Vector3 relativePosition = originalVertexPosition - baseVertex;
+
+        float ratio = relativePosition.magnitude / baseRadius;
+
+        Vector3 newPosition = baseVertex +
+            Quaternion.Euler(0f, angle, 0f) * (relativePosition.normalized * (ratio * radius));
+
+        vertices[i] = newPosition;
+    }
+
+    coneMesh.vertices = vertices;
+    coneMesh.RecalculateNormals();
+}
+
+}
